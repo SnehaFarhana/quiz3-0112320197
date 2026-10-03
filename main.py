@@ -14,6 +14,11 @@ class Book(BaseModel):
     price: float
 
 
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    price: Optional[float] = None
+
+
 @app.get("/books")
 def get_all_books():
     return books
@@ -24,7 +29,33 @@ def create_book(book: Book):
     global next_id
 
     books[next_id] = book.dict()
-
+    created_book = books[next_id]
     next_id += 1
 
-    return books[next_id - 1]
+    return created_book
+
+
+@app.put("/books/{book_id}")
+def update_book(book_id: int, update: BookUpdate):
+    if book_id not in books:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    data = books[book_id]
+
+    if update.title:
+        data["title"] = update.title
+
+    if update.price is not None:
+        data["price"] = update.price
+
+    return data
+
+
+@app.delete("/books/{book_id}")
+def delete_book(book_id: int):
+    if book_id not in books:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    del books[book_id]
+
+    return {"message": "Book deleted"}
