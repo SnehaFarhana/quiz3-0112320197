@@ -25,3 +25,17 @@ def test_delete_book():
     assert response.status_code == 200
     check = client.get("/books")
     assert len(check.json()) == 0
+
+def test_get_all_books():
+    client.post("/books", json={"title":"A","author":"X","price":10.0})
+    client.post("/books", json={"title":"B","author":"Y","price":20.0})
+    response = client.get("/books")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+def test_update_book():
+    client.post("/books", json={"title":"Old","author":"Z","price":10.0})
+    response = client.put("/books/1", json={"price": 99.0})
+    assert response.status_code == 200
+    assert response.json()["price"] == 99.0
+    assert response.json()["title"] == "Old"
